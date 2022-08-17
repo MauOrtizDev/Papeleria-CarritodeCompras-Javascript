@@ -11,19 +11,37 @@
 </head>
 
 <body>
-
     <h1>Papelería El estudiante</h1>
+    <h2 id="contador"></h2>
     <h2>Todo lo que necesitas en útiles, cuadernos, morrales, y tu vida escolar y de oficina.</h2>
-    <div>
-        <h3>Buscar por Categoría</h3>
-        <div id="categorias" class=" btn-group d-flex">
+    <div class="container-flex">
+        <div class="row justify-content-md-center">
+            <div class="col col-lg-9 col-md-9">
+                <div>
+                    <div id="categorias" class=" btn-group d-flex">
 
-        </div>
-    </div>
-    <div class="container album py-5 bg-light">
-        <h3>Nuestro catálogo:</h3>
-        <div id="lista-productos" class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3">
+                    </div>
+                </div>
+                <div class="container-flex album py-5 bg-light">
+                    <h3>Productos:</h3>
+                    <div id="lista-productos" class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3">
 
+                    </div>
+                </div>
+            </div>
+
+            <div class="col col-lg-3 col-md-3">
+                <div class="container-flex album bg-light text-center">
+                    <h3>Carrito Compras</h3>
+                    <h4 id="total" class="text-end mx-2 bg-success"></h4>
+                    <ul id="carrito" class="list-group">
+
+                    </ul>
+                </div>
+                <div id="carritocompleto">
+
+                </div>
+            </div>
         </div>
     </div>
     <script src="./scripts/app.js" defer></script>

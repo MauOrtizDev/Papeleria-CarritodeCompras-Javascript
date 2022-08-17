@@ -69,6 +69,7 @@ class Producto {
         this.categoria = categoria;
         this.descripcion = descripcion;
         this.precio = Intl.NumberFormat('es-CO').format(precio);
+        this.precioReal = precio;
     }
     hacerDescuento(porcentaje) {
         return this.precio * (1 - porcentaje / 100)
@@ -77,9 +78,13 @@ class Producto {
 // DECLARACION DE VARIABLES
 const productos = [];
 let listaCategorias = ["Todos los productos"];
+let productosElegidos = [];
 let carritoCompras = [];
 let seguirComprando = true;
 let totalAPagar = 0;
+let totalEnHTML = document.getElementById("total");
+let carritoCompletoEnHTML = document.getElementById("carritocompleto");
+console.log(carritoCompletoEnHTML);
 
 // Creación de productos a partir de la base de datos
 infoProductos.forEach((productoInfo) => {
@@ -91,134 +96,152 @@ infoProductos.forEach((producto) => {
     if (!listaCategorias.includes(producto.categoria)) {
         listaCategorias.push(producto.categoria);
 
-        
+
     }
 })
 // Creación de Botones de categorías
 let categoriasEnHTML = document.getElementById("categorias")
-for (const categoria of listaCategorias){
+
+// Inicialización de la página
+elegirProductos("Todos los productos");
+mostrarCarritoEnHTML();
+for (const categoria of listaCategorias) {
     let boton = document.createElement("button");
     boton.innerText = categoria;
     boton.classList.add('btn', 'btn-sm', 'btn-outline-success');
+
+    boton.addEventListener("click", function () { elegirProductos(categoria) }, false);
     categoriasEnHTML.appendChild(boton);
-    boton.addEventListener("click", function(){elegirProductos(categoria)},false);
 }
 
-function elegirProductos(cat){
-    if (cat == "Todos los productos"){
-        alert(cat);
+// Dependiendo del boton que se pulse, se elegirán productos
+function elegirProductos(cat) {
+    if (cat == "Todos los productos") {
+        productosElegidos = productos;
     } else {
-        alert("wehuu "+cat);
+        productosElegidos = productos.filter(
+            (prod) => {
+                if (prod.categoria == cat) return prod;
+            }
+        )
     }
-};
+    let listadoEnHTML = document.getElementById("lista-productos");
 
-// En esta parte, se irán agregando los productos al html
-let listadoEnHTML = document.getElementById("lista-productos");
-for (const producto of productos) {
-    let contenedor = document.createElement("div");
-    contenedor.classList.add('col');
-    contenedor.innerHTML = `<div class="card shadow-sm">
+    listadoEnHTML.innerHTML = '';
+    for (const producto of productosElegidos) {
+        let contenedor = document.createElement("div");
+        contenedor.classList.add('col');
+        let boton = document.createElement("button");
+        boton.innerText = "Compra";
+        boton.classList.add('btn', 'btn-sm', 'btn-outline-success');
+        boton.addEventListener("click", function () { anadirAlCarrito(producto) }, false);
+        contenedor.innerHTML = `<div class="card shadow-sm">
                                 <div class="card-body">
                                 <h3>${producto.nombre}</h3>
                                 <p>${producto.descripcion}</p>
                                 <h4>Precio: $${producto.precio}</h4>
-                                <div class=" btn-group d-flex">
-                                    <button type="button" class="btn btn-sm btn-outline-success">Comprar</button>
+                                <div id="boton-prod-${productosElegidos.indexOf(producto)}" class=" btn-group d-flex">
                                 </div>
                                 </div>
                             </div>`;
-    listadoEnHTML.appendChild(contenedor);
+        listadoEnHTML.appendChild(contenedor);
+        let divBoton = document.getElementById(`boton-prod-${productosElegidos.indexOf(producto)}`);
+        divBoton.appendChild(boton);
+    }
+};
+
+
+
+function anadirAlCarrito(prod) {
+    carritoCompras.push(prod);
+    mostrarCarritoEnHTML();
+}
+function mostrarCarritoEnHTML(){
+    let carritoEnHTML = document.getElementById("carrito")
+    carritoEnHTML.innerHTML = '';
+    if(carritoCompras.length>0){
+    const carritoSinDuplicados = [...new Set(carritoCompras)];
+    console.log("carrito sin duplicados "+carritoSinDuplicados);
+    console.log("carrito "+carritoCompras);
+
+    carritoSinDuplicados.forEach((item) => {
+        const miItem = productos.filter((itemBaseDatos) => {
+            return itemBaseDatos.id === item.id;
+        });
+        const numeroUnidadesItem = carritoCompras.reduce((total, itemId) => {
+            return itemId === item ? total += 1 : total;
+        }, 0);
+
+        console.log(miItem);
+        const miNodo = document.createElement('li');
+        miNodo.classList.add('list-group-item','text-right','d-flex','justify-content-between');
+        miNodo.innerHTML = `<span><strong>${miItem[0].nombre}</strong> - $${miItem[0].precio} (${numeroUnidadesItem}) </span>`;
+    
+    // Boton de borrar
+    const miBoton = document.createElement('button');
+    miBoton.classList.add('btn', 'btn-secondary');
+    miBoton.textContent = 'Quitar';
+    miBoton.dataset.item = item;
+    console.log("dataset del item "+miBoton.dataset.item+" "+item.id);
+    miBoton.addEventListener("click", function () { borrarElementoDelCarrito(item.id) }, false);
+    // Mezclamos nodos
+    miNodo.appendChild(miBoton);
+    carritoEnHTML.appendChild(miNodo);
+});
+// Renderizamos el precio total en el HTML
+totalEnHTML.innerHTML = calcularTotal();
+} else {
+    const miNodo = document.createElement('li');
+        miNodo.classList.add('list-group-item','text-right','d-flex','justify-content-between');
+        miNodo.innerHTML = `<span>No hay elementos en el carrito</span>`;
+        carritoEnHTML.appendChild(miNodo);
+}
+totalEnHTML.innerHTML = calcularTotal();
 }
 
 
 
+function borrarElementoDelCarrito(id){
+    console.log("el id del producto a borrar era: "+id);
+    const posicion = carritoCompras.lastIndexOf(carritoCompras.find(elemento => elemento.id==id));
+    console.log("position "+posicion);
+    carritoCompras.splice(posicion,1);
+    console.log("Nuevo Carrito "+carritoCompras);
+    
 
-// // Bienvenida
-// alert("BIENVENIDO A LA TIENDA DE ÚTILES ESCOLARES 'EL ESTUDIANTE'");
-// alert("¿Qué tipo de producto te interesa hoy?")
-// console.log(carritoCompras.length);
-// // Inicio de un bucle while, donde se irán haciendo las compras, y anexando los prodcutos elegidos a un carrito de compras
-// while (seguirComprando) {
+mostrarCarritoEnHTML();
+}
 
-//     // Variables temporales que se necesitan
-//     let eleccion;
-//     let catElegida;
-//     let productosElegidos = [];
+function calcularTotal(){
+    const total = carritoCompras.reduce(function (total, obj) {
+        return parseInt(total + obj.precioReal); }, 0);
+        return total != 0? "Total: $"+Intl.NumberFormat('es-CO').format(total):'';
 
-//     // Se pregunta un número para cada categoría existente.
-//     do {
-//         eleccion = parseInt(prompt("Elige un número de acuerdo a la categoría (Presiona 0 para salir):\n" + numerarElementos(listaCategorias)));
-
-//     } while (!Number.isInteger(eleccion) || (eleccion < 0 || eleccion > listaCategorias.length));
-
-//     // Dependiendo de la elección, se realiza una asignación de categoría y productos
-//     switch (eleccion) {
-//         case 0: {
-
-//             // 0 para salir, por eso seguirComprando se hace false
-//             alert("Pulsaste 0, finalización de compra");
-//             seguirComprando = false;
-
-//             break;
-//         }
-//         case 1: {
-
-//             // 1 para 'Todos los productos', por lo que los productos elegidos será el mismo array de productos
-//             catElegida = listaCategorias[eleccion - 1];
-//             productosElegidos = productos;
-//             break;
-//         }
-//         default: {
-
-//             // Para el resto de casos, se hace elección de los productos que coincidad con la categoría elegida
-//             catElegida = listaCategorias[eleccion - 1];
-//             for (i = 0; i < productos.length; i++) {
-//                 if (productos[i].categoria == catElegida) {
-//                     productosElegidos.push(productos[i])
-//                 }
-//             }
-//             break;
-//         }
+}
+// PARA COMPARAR DESPUES
+// 
+//         for (const producto of carritoCompras) {
+//             let contenedor = document.createElement("div");
+//             contenedor.classList.add('col');
+//             let boton = document.createElement("button");
+//             boton.innerText = "Quitar";
+//             boton.classList.add('btn', 'btn-sm', 'btn-outline-success');
+//             boton.addEventListener("click", function () { quitarDelCarrito(producto) }, false);
+//             contenedor.innerHTML = `<div class="card shadow-sm">
+//                                 <div class="card-body">
+//                                 <h3>${producto.nombre}</h3>
+//                                 <h4>Precio: $${producto.precio}</h4>
+//                                 <div class=" btn-group d-flex">
+//                                 </div>
+//                                 </div>
+//                             </div>`;
+//                             contenedor.appendChild(boton);
+//                             carritoEnHTML.appendChild(contenedor);
 //     }
-//     if (seguirComprando) {
-
-//         // Si se decide hacer una compra, se mostrarán todos los productos elegidos y su precio
-//         let mensaje = "";
-//         for (let el of productosElegidos) {
-//             if (el.categoria == catElegida || catElegida == "Todos los productos") {
-//                 mensaje += el.nombre + " - Precio: $" + el.precio + " (" + (1 + productosElegidos.indexOf(el)) + ")\n";
-//             }
-//         }
-//         do {
-//             eleccion = parseInt(prompt("En la categoria '" + catElegida + "' se tienen los siguientes items:\n\nPresiona el número del producto par elegirlo o 0 para cancelar compra:\n\n" + mensaje));
-
-//         } while (!Number.isInteger(eleccion) || (eleccion < 0 || eleccion > productosElegidos.length));
-
-//         let articuloAComprar;
-//         if (eleccion == 0) {
-//             alert("No se eligió un producto");
-
-//         } else {
-//             // Se muestra en pantalla el producto a elegir
-//             articuloAComprar = productosElegidos[eleccion - 1];
-//             mensaje = "Elegiste el artículo '" + articuloAComprar.nombre + "'";
-//             mensaje += "\nPrecio: $" + articuloAComprar.precio;
-//             mensaje += "\nDescripción: " + articuloAComprar.descripcion;
-//             alert(mensaje);
-
-//             // Se confirma la compra. en caso positivo se agrega al array articuloAComprar
-//             let confirmarCompra = confirm("¿Deseas comprarlo?");
-//             if (confirmarCompra) {
-//                 carritoCompras.push(articuloAComprar);
-//                 alert("¡Agregado al Carrito!");
-//                 alert("tienes " + carritoCompras.length + " artículo(s) en tu carrito\nPrecio Total de Artículos en el Carrito: $" + calcularVrTotArticulos(carritoCompras));
-//             }
-//         }
-
-//         // Se pregunta si se desea seguir comprando
-//         seguirComprando = confirm("¿Volver a Elegir Categoría?");
-//     }
+    
 // }
+
+
 
 // // Al final se muestran los artículos comprados
 // if(carritoCompras.length > 0){
