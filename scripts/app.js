@@ -83,8 +83,6 @@ let carritoCompras = [];
 let seguirComprando = true;
 let totalAPagar = 0;
 let totalEnHTML = document.getElementById("total");
-let carritoCompletoEnHTML = document.getElementById("carritocompleto");
-console.log(carritoCompletoEnHTML);
 
 // Creación de productos a partir de la base de datos
 infoProductos.forEach((productoInfo) => {
@@ -161,8 +159,6 @@ function mostrarCarritoEnHTML(){
     carritoEnHTML.innerHTML = '';
     if(carritoCompras.length>0){
     const carritoSinDuplicados = [...new Set(carritoCompras)];
-    console.log("carrito sin duplicados "+carritoSinDuplicados);
-    console.log("carrito "+carritoCompras);
 
     carritoSinDuplicados.forEach((item) => {
         const miItem = productos.filter((itemBaseDatos) => {
@@ -172,7 +168,6 @@ function mostrarCarritoEnHTML(){
             return itemId === item ? total += 1 : total;
         }, 0);
 
-        console.log(miItem);
         const miNodo = document.createElement('li');
         miNodo.classList.add('list-group-item','text-right','d-flex','justify-content-between');
         miNodo.innerHTML = `<span><strong>${miItem[0].nombre}</strong> - $${miItem[0].precio} (${numeroUnidadesItem}) </span>`;
@@ -180,9 +175,7 @@ function mostrarCarritoEnHTML(){
     // Boton de borrar
     const miBoton = document.createElement('button');
     miBoton.classList.add('btn', 'btn-secondary');
-    miBoton.textContent = 'Quitar';
-    miBoton.dataset.item = item;
-    console.log("dataset del item "+miBoton.dataset.item+" "+item.id);
+    miBoton.innerText = 'Quitar';
     miBoton.addEventListener("click", function () { borrarElementoDelCarrito(item.id) }, false);
     // Mezclamos nodos
     miNodo.appendChild(miBoton);
@@ -202,11 +195,10 @@ totalEnHTML.innerHTML = calcularTotal();
 
 
 function borrarElementoDelCarrito(id){
-    console.log("el id del producto a borrar era: "+id);
+    console.log("el id del producto a borrar es: "+id);
     const posicion = carritoCompras.lastIndexOf(carritoCompras.find(elemento => elemento.id==id));
-    console.log("position "+posicion);
+    console.log("Está en la posición "+posicion);
     carritoCompras.splice(posicion,1);
-    console.log("Nuevo Carrito "+carritoCompras);
     
 
 mostrarCarritoEnHTML();
