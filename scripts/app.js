@@ -76,14 +76,13 @@ class Producto {
     }
 }
 // DECLARACION DE VARIABLES
+let usuario;
 const productos = [];
 let listaCategorias = ["Todos los productos"];
 let productosElegidos = [];
 let carritoCompras = [];
-let seguirComprando = true;
-let totalAPagar = 0;
-let totalEnHTML = document.getElementById("total");
-
+const totalEnHTML = document.getElementById("total");
+const categoriasEnHTML = document.getElementById("categorias")
 // Creación de productos a partir de la base de datos
 infoProductos.forEach((productoInfo) => {
     productos.push(new Producto(productoInfo.id, productoInfo.nombre, productoInfo.categoria, productoInfo.descripcion, productoInfo.precio))
@@ -91,25 +90,24 @@ infoProductos.forEach((productoInfo) => {
 
 // Creación de la lista de categorías
 infoProductos.forEach((producto) => {
-    if (!listaCategorias.includes(producto.categoria)) {
-        listaCategorias.push(producto.categoria);
-
-
-    }
+    if (!listaCategorias.includes(producto.categoria)) listaCategorias.push(producto.categoria)
 })
-// Creación de Botones de categorías
-let categoriasEnHTML = document.getElementById("categorias")
 
 // Inicialización de la página
 elegirProductos("Todos los productos");
+mostrarCategoriasEnHTML();
 mostrarCarritoEnHTML();
-for (const categoria of listaCategorias) {
-    let boton = document.createElement("button");
-    boton.innerText = categoria;
-    boton.classList.add('btn', 'btn-sm', 'btn-outline-success');
 
-    boton.addEventListener("click", function () { elegirProductos(categoria) }, false);
-    categoriasEnHTML.appendChild(boton);
+
+function mostrarCategoriasEnHTML() {
+    for (const categoria of listaCategorias) {
+        let boton = document.createElement("button");
+        boton.innerText = categoria;
+        boton.classList.add('btn', 'btn-sm', 'btn-outline-success');
+
+        boton.addEventListener("click", function () { elegirProductos(categoria) }, false);
+        categoriasEnHTML.appendChild(boton);
+    }
 }
 
 // Dependiendo del boton que se pulse, se elegirán productos
@@ -148,114 +146,58 @@ function elegirProductos(cat) {
     }
 };
 
-
-
 function anadirAlCarrito(prod) {
     carritoCompras.push(prod);
     mostrarCarritoEnHTML();
 }
-function mostrarCarritoEnHTML(){
+
+function mostrarCarritoEnHTML() {
     let carritoEnHTML = document.getElementById("carrito")
     carritoEnHTML.innerHTML = '';
-    if(carritoCompras.length>0){
-    const carritoSinDuplicados = [...new Set(carritoCompras)];
+    if (carritoCompras.length > 0) {
+        const carritoSinDuplicados = [...new Set(carritoCompras)];
 
-    carritoSinDuplicados.forEach((item) => {
-        const miItem = productos.filter((itemBaseDatos) => {
-            return itemBaseDatos.id === item.id;
+        carritoSinDuplicados.forEach((item) => {
+            const numeroUnidadesItem = carritoCompras.reduce((total, obj) => {
+                return obj.id === item.id ? total += 1 : total;
+            }, 0);
+
+            const miNodo = document.createElement('li');
+            miNodo.classList.add('list-group-item', 'text-right', 'd-flex', 'justify-content-between');
+            miNodo.innerHTML = `<span><strong>${item.nombre}</strong> - $${item.precio} (${numeroUnidadesItem}) </span>`;
+
+            // Boton de borrar
+            const miBoton = document.createElement('button');
+            miBoton.classList.add('btn', 'btn-secondary');
+            miBoton.innerText = 'Quitar';
+            miBoton.addEventListener("click", function () { borrarElementoDelCarrito(item.id) }, false);
+            // Mezclamos nodos
+            miNodo.appendChild(miBoton);
+            carritoEnHTML.appendChild(miNodo);
         });
-        const numeroUnidadesItem = carritoCompras.reduce((total, itemId) => {
-            return itemId === item ? total += 1 : total;
-        }, 0);
-
+        // Renderizamos el precio total en el HTML
+        totalEnHTML.innerHTML = calcularTotal();
+    } else {
         const miNodo = document.createElement('li');
-        miNodo.classList.add('list-group-item','text-right','d-flex','justify-content-between');
-        miNodo.innerHTML = `<span><strong>${miItem[0].nombre}</strong> - $${miItem[0].precio} (${numeroUnidadesItem}) </span>`;
-    
-    // Boton de borrar
-    const miBoton = document.createElement('button');
-    miBoton.classList.add('btn', 'btn-secondary');
-    miBoton.innerText = 'Quitar';
-    miBoton.addEventListener("click", function () { borrarElementoDelCarrito(item.id) }, false);
-    // Mezclamos nodos
-    miNodo.appendChild(miBoton);
-    carritoEnHTML.appendChild(miNodo);
-});
-// Renderizamos el precio total en el HTML
-totalEnHTML.innerHTML = calcularTotal();
-} else {
-    const miNodo = document.createElement('li');
-        miNodo.classList.add('list-group-item','text-right','d-flex','justify-content-between');
+        miNodo.classList.add('list-group-item', 'text-right', 'd-flex', 'justify-content-between');
         miNodo.innerHTML = `<span>No hay elementos en el carrito</span>`;
         carritoEnHTML.appendChild(miNodo);
-}
-totalEnHTML.innerHTML = calcularTotal();
-}
-
-
-
-function borrarElementoDelCarrito(id){
-    console.log("el id del producto a borrar es: "+id);
-    const posicion = carritoCompras.lastIndexOf(carritoCompras.find(elemento => elemento.id==id));
-    console.log("Está en la posición "+posicion);
-    carritoCompras.splice(posicion,1);
-    
-
-mostrarCarritoEnHTML();
+    }
+    totalEnHTML.innerHTML = calcularTotal();
 }
 
-function calcularTotal(){
+function borrarElementoDelCarrito(id) {
+    console.log("el id del producto a borrar es: " + id);
+    const posicion = carritoCompras.lastIndexOf(carritoCompras.find(elemento => elemento.id == id));
+    console.log("Está en la posición " + posicion);
+    carritoCompras.splice(posicion, 1);
+    mostrarCarritoEnHTML();
+}
+
+function calcularTotal() {
     const total = carritoCompras.reduce(function (total, obj) {
-        return parseInt(total + obj.precioReal); }, 0);
-        return total != 0? "Total: $"+Intl.NumberFormat('es-CO').format(total):'';
+        return parseInt(total + obj.precioReal);
+    }, 0);
+    return total != 0 ? "Total: $" + Intl.NumberFormat('es-CO').format(total) : '';
 
 }
-// PARA COMPARAR DESPUES
-// 
-//         for (const producto of carritoCompras) {
-//             let contenedor = document.createElement("div");
-//             contenedor.classList.add('col');
-//             let boton = document.createElement("button");
-//             boton.innerText = "Quitar";
-//             boton.classList.add('btn', 'btn-sm', 'btn-outline-success');
-//             boton.addEventListener("click", function () { quitarDelCarrito(producto) }, false);
-//             contenedor.innerHTML = `<div class="card shadow-sm">
-//                                 <div class="card-body">
-//                                 <h3>${producto.nombre}</h3>
-//                                 <h4>Precio: $${producto.precio}</h4>
-//                                 <div class=" btn-group d-flex">
-//                                 </div>
-//                                 </div>
-//                             </div>`;
-//                             contenedor.appendChild(boton);
-//                             carritoEnHTML.appendChild(contenedor);
-//     }
-    
-// }
-
-
-
-// // Al final se muestran los artículos comprados
-// if(carritoCompras.length > 0){
-//     let mensaje = "";
-//     for (let el of carritoCompras) {
-//             mensaje += el.nombre + " - Precio: $" + el.precio + " (" + (1 + carritoCompras.indexOf(el)) + ")\n";
-//     }
-//     alert("Tus artículo(s) elegidos fueron:\n"+mensaje);
-//     alert("Valor a Pagar: $"+calcularVrTotArticulos(carritoCompras));
-// } else {
-//     alert("Esperamos que la próxima vez podamos ofrecerte lo que estás buscando");
-// }
-
-// alert("Gracias por tu visita");
-
-// function calcularVrTotArticulos(articulos) {
-//     return articulos.reduce(function (total, obj) { return total + obj.precio; }, 0)
-// }
-// function numerarElementos(arreglo) {
-//     let arregloNumerado = [];
-//     for (let i = 0; i < arreglo.length; i++) {
-//         arregloNumerado.push(arreglo[i] + " (" + (i + 1) + ")");
-//     }
-//     return arregloNumerado.join("\n");
-// }

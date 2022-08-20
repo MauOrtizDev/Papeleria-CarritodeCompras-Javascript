@@ -1,0 +1,31 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    overflow-x: hidden;
+}
+.bloqueo-usuario{
+    width: 100vw;
+    height: 100vh;
+    background-color: #252525;
+    position: fixed; 
+    z-index: 3;
+    opacity: 0.8;
+    transition: all 0.3s;
+}
+
+.datos-usuario{
+    position: fixed;
+    width: 300px;
+    height: 380px;
+    background-color: #17b914;
+    top: 50%;
+    left: 50%;
+    margin-left:-150px;
+    margin-top: -190px;
+    opacity: 1;
+    z-index: 4;
+    border-radius:10px;
+}
