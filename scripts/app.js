@@ -80,7 +80,7 @@ let usuario;
 const productos = [];
 let listaCategorias = ["Todos los productos"];
 let productosElegidos = [];
-let carritoCompras = [];
+let carritoCompras = JSON.parse(localStorage.getItem("carrito-compras")) || [];
 const totalEnHTML = document.getElementById("total");
 const categoriasEnHTML = document.getElementById("categorias")
 // Creación de productos a partir de la base de datos
@@ -148,6 +148,7 @@ function elegirProductos(cat) {
 
 function anadirAlCarrito(prod) {
     carritoCompras.push(prod);
+    carritoEnJSON();
     mostrarCarritoEnHTML();
 }
 
@@ -174,6 +175,7 @@ function mostrarCarritoEnHTML() {
             // Mezclamos nodos
             miNodo.appendChild(miBoton);
             carritoEnHTML.appendChild(miNodo);
+            
         });
         // Renderizamos el precio total en el HTML
         totalEnHTML.innerHTML = calcularTotal();
@@ -191,6 +193,7 @@ function borrarElementoDelCarrito(id) {
     const posicion = carritoCompras.lastIndexOf(carritoCompras.find(elemento => elemento.id == id));
     console.log("Está en la posición " + posicion);
     carritoCompras.splice(posicion, 1);
+    carritoEnJSON();
     mostrarCarritoEnHTML();
 }
 
@@ -200,4 +203,9 @@ function calcularTotal() {
     }, 0);
     return total != 0 ? "Total: $" + Intl.NumberFormat('es-CO').format(total) : '';
 
+}
+
+function carritoEnJSON(){
+    const carritoJSON = JSON.stringify(carritoCompras);
+    localStorage.setItem("carrito-compras",carritoJSON);
 }
