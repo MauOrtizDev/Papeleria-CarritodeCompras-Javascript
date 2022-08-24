@@ -76,13 +76,13 @@ class Producto {
     }
 }
 // DECLARACION DE VARIABLES
-let usuario;
-const productos = [];
-let listaCategorias = ["Todos los productos"];
-let productosElegidos = [];
-let carritoCompras = JSON.parse(localStorage.getItem("carrito-compras")) || [];
-const totalEnHTML = document.getElementById("total");
-const categoriasEnHTML = document.getElementById("categorias")
+let usuario,
+    productosElegidos = [];
+const productos = [],
+    listaCategorias = ["Todos los productos"],
+    carritoCompras = JSON.parse(localStorage.getItem("carrito-compras")) || [],
+    totalEnHTML = document.getElementById("total"),
+    categoriasEnHTML = document.getElementById("categorias");
 // Creación de productos a partir de la base de datos
 infoProductos.forEach((productoInfo) => {
     productos.push(new Producto(productoInfo.id, productoInfo.nombre, productoInfo.categoria, productoInfo.descripcion, productoInfo.precio))
@@ -90,7 +90,8 @@ infoProductos.forEach((productoInfo) => {
 
 // Creación de la lista de categorías
 infoProductos.forEach((producto) => {
-    if (!listaCategorias.includes(producto.categoria)) listaCategorias.push(producto.categoria)
+    // Aplicación de operador avanzado &&
+    !listaCategorias.includes(producto.categoria) && listaCategorias.push(producto.categoria)
 })
 
 // Inicialización de la página
@@ -156,10 +157,12 @@ function mostrarCarritoEnHTML() {
     let carritoEnHTML = document.getElementById("carrito")
     carritoEnHTML.innerHTML = '';
     if (carritoCompras.length > 0) {
+        // Spread del Objeto Set para crear un array
         const carritoSinDuplicados = [...new Set(carritoCompras)];
 
         carritoSinDuplicados.forEach((item) => {
             const numeroUnidadesItem = carritoCompras.reduce((total, obj) => {
+                // Operador ternario
                 return obj.id === item.id ? total += 1 : total;
             }, 0);
 
@@ -201,6 +204,7 @@ function calcularTotal() {
     const total = carritoCompras.reduce(function (total, obj) {
         return parseInt(total + obj.precioReal);
     }, 0);
+    // Operador ternario
     return total != 0 ? "Total: $" + Intl.NumberFormat('es-CO').format(total) : '';
 
 }

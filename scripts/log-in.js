@@ -1,9 +1,8 @@
+
 if (localStorage.getItem("nombre-usuario") === null && sessionStorage.getItem("nombre-usuario") === null) {
 
     let formularioUsuario = document.getElementById("formulario-usuario");
     formularioUsuario.addEventListener("submit", validarFormulario);
-    console.log("hey")
-
 
 } else {
     quitarBloqueo();
